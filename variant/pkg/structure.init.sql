@@ -113,10 +113,10 @@ CREATE TABLE persons_names (
 
 SELECT new_code_by_userseqs(
                   ROW ('person', 'plain code' :: code_type) :: code_construction_input
-                , make_codekeyl_bystr('Entities')
+                , make_codekeyl_bystr('Named entities')
                 , FALSE
                 , ''
-                , 'sch_<<$app_name$>>.entities_ids_seq'
+                , 'sch_<<$app_name$>>.namentities_ids_seq'
                 ) AS person_entity_id;
 
 ALTER TABLE persons_names ALTER COLUMN entity SET DEFAULT code_id_of_entity('person');
@@ -197,10 +197,10 @@ CREATE TABLE contacts_names (
 
 SELECT new_code_by_userseqs(
                   ROW ('contact', 'plain code' :: code_type) :: code_construction_input
-                , make_codekeyl_bystr('Entities')
+                , make_codekeyl_bystr('Named entities')
                 , FALSE
                 , ''
-                , 'sch_<<$app_name$>>.entities_ids_seq'
+                , 'sch_<<$app_name$>>.namentities_ids_seq'
                 ) AS contact_entity_id;
 
 ALTER TABLE contacts_names ALTER COLUMN entity SET DEFAULT code_id_of_entity('contact');

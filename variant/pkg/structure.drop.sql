@@ -30,7 +30,7 @@ DROP FUNCTION IF EXISTS personal_contacts_onmodify();
 
 DROP INDEX IF EXISTS names_of_contacts_idx;
 DROP TABLE IF EXISTS contacts_names;
-SELECT remove_code(TRUE, make_acodekeyl_bystr2('Entities', 'contact'), TRUE, TRUE, TRUE);
+SELECT remove_code(TRUE, make_acodekeyl_bystr2('Named entities', 'contact'), TRUE, TRUE, TRUE);
 
 DROP INDEX IF EXISTS persons_of_contacts_idx;
 DROP INDEX IF EXISTS types_of_contacts_idx;
@@ -39,7 +39,7 @@ SELECT remove_code(TRUE, make_acodekeyl_bystr1('Personal contacts types'), TRUE,
 
 DROP INDEX IF EXISTS names_of_persons_idx;
 DROP TABLE IF EXISTS persons_names;
-SELECT remove_code(TRUE, make_acodekeyl_bystr2('Entities', 'person'), TRUE, TRUE, TRUE);
+SELECT remove_code(TRUE, make_acodekeyl_bystr2('Named entities', 'person'), TRUE, TRUE, TRUE);
 
 DROP TABLE IF EXISTS persons_languages;
 

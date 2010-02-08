@@ -141,7 +141,7 @@ BEGIN
                                   ELSE dflt_lng_c_id
                              END AS lng_of_name
                            , inp.name
-                           , code_id_of( FALSE, generalize_codekeyl_wcf(make_codekey_bystr('Entities'), inp.entity)) AS entity
+                           , code_id_of( FALSE, generalize_codekeyl_wcf(make_codekey_bystr('Named entities'), inp.entity)) AS entity
                            , inp.description
                       FROM unnest(par_names) AS inp
                       WHERE codekeyl_type(inp.entity) != 'undef'
@@ -292,7 +292,7 @@ BEGIN
                                   ELSE dflt_lng_c_id
                              END AS lng_of_name
                            , inp.name
-                           , code_id_of( FALSE, generalize_codekeyl_wcf(make_codekey_bystr('Entities'), inp.entity)) AS entity
+                           , code_id_of( FALSE, generalize_codekeyl_wcf(make_codekey_bystr('Named entities'), inp.entity)) AS entity
                            , inp.description
                       FROM unnest(par_contact_names) AS inp
                       WHERE codekeyl_type(inp.entity) != 'undef'
