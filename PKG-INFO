@@ -1,0 +1,18 @@
+Name: Person-Contact
+Description: 
+      Persons registry. For each person there may be stored multiple contacts, 
+      which may include information about postal address, network address,  
+      phone/fax contacts and/or contacts through representatives-persons.
+Version: 0.1
+License: BSD3
+Copyright: Copyright (c) 2010 Andrejs Sisojevs
+License-File: COPYING
+Author: Andrejs Sisojevs <andrejs.sisojevs@nextmail.ru>
+Maintainer: Andrejs Sisojevs <andrejs.sisojevs@nextmail.ru>
+Stability: alpha
+Homepage: http://github.com/Andrey-Sisoyev/DBP-Person-Contact
+Category: Database
+Tested-With: ArchLinux, PostgreSQL v8.4
+Depends-On: Codifier >= 0.5
+Manual-file: HOWTO
+Safe-to-test-with-user-data: FALSE
