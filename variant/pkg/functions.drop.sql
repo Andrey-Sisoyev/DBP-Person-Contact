@@ -2,24 +2,26 @@
 --
 -- All rights reserved.
 --
--- For information about license see COPYING file in the root directory of current nominal package
+-- For license and copyright information, see the file COPYRIGHT
 
 --------------------------------------------------------------------------
 --------------------------------------------------------------------------
 
 -- (1) case sensetive (2) postgres lowercases real names
-\c <<$db_name$>> user_<<$app_name$>>_owner
+\c <<$db_name$>> user_db<<$db_name$>>_app<<$app_name$>>_owner
 
-SET search_path TO sch_<<$app_name$>>, public; -- sets only for current session
+SET search_path TO sch_<<$app_name$>>; -- , comn_funs, public; -- sets only for current session
+
+\echo NOTICE >>>>> functions.drop.sql [BEGIN]
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
-
--- DROP FUNCTION IF EXISTS ...
--- DROP TYPE     IF EXISTS ...
 
 \i contacts_instances/main.drop.sql
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 
 -- Referncing functions:
 
@@ -40,7 +42,6 @@ DROP FUNCTION IF EXISTS new_person(par_person_type t_code_key_by_lng, par_names 
 DROP FUNCTION IF EXISTS add_languages_to_person(par_person_id integer, par_languages t_person_language_construction_input[]);
 DROP FUNCTION IF EXISTS add_names_to_person(par_person_id integer, par_names name_construction_input[]);
 
-
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
@@ -48,3 +49,7 @@ DROP TYPE IF EXISTS contact_construction_input;
 DROP TYPE IF EXISTS t_person_language_construction_input;
 DROP TYPE IF EXISTS posix_regexp_match_op;
 
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+\echo NOTICE >>>>> functions.drop.sql [END]

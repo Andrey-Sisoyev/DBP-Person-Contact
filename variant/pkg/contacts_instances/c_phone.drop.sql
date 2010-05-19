@@ -7,7 +7,10 @@
 --------------------------------------------------------------------------
 --------------------------------------------------------------------------
 
-\echo c_phone.drop.sql
+\echo NOTICE >>>>> contacts_instances/c_phone.drop.sql [BEGIN]
+
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
 
 DROP FUNCTION IF EXISTS instaniate_contact_as_phone(par_contact_id integer, par_contact_phone_ci contact_phone_construction_input);
 
@@ -24,3 +27,8 @@ UPDATE contacts SET contact_type = NULL, contact_instaniated_isit = FALSE WHERE 
 DROP TABLE IF EXISTS contacts__phones;
 
 SELECT remove_code(TRUE, make_acodekeyl_bystr2('Personal contacts types', 'phone'), TRUE, TRUE, TRUE);
+
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
+
+\echo NOTICE >>>>> contacts_instances/c_phone.drop.sql [END]

@@ -7,26 +7,36 @@
 --------------------------------------------------------------------------
 --------------------------------------------------------------------------
 
-\i functions.drop.sql
+\c <<$db_name$>> user_db<<$db_name$>>_app<<$app_name$>>_owner
 
-\c <<$db_name$>> user_<<$app_name$>>_owner
-\set ECHO queries
-
-SET search_path TO sch_<<$app_name$>>, public; -- sets only for current session
+SET search_path TO sch_<<$app_name$>>; -- , comn_funs, public; -- sets only for current session
 
 DELETE FROM dbp_packages WHERE package_name = '<<$pkg.name$>>'
                            AND package_version = '<<$pkg.ver$>>'
                            AND dbp_standard_version = '<<$pkg.std_ver$>>';
 
+-- IF DROPPING CUSTOM ROLES/TABLESPACES, then don't forget to unregister
+-- them (under application owner DB account) using
+-- FUNCTION public.unregister_cwobj_thatwere_dependant_on_current_dbapp(
+--        par_cwobj_name varchar
+--      , par_cwobj_type t_clusterwide_obj_types
+--      )
+-- , where TYPE public.t_clusterwide_obj_types IS ENUM ('tablespace', 'role')
+
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
-DROP TRIGGER IF EXISTS tri_personal_contacts_onmodify ON contacts;
+\i ../data/data.drop.sql
+\i functions.drop.sql
+\i triggers.drop.sql
 
-DROP FUNCTION IF EXISTS personal_contact_detail_onderef();
-DROP FUNCTION IF EXISTS personal_contact_detail_onmodify();
-DROP FUNCTION IF EXISTS personal_contacts_onmodify();
+-------------------------------------------------------------------------------
+
+\echo NOTICE >>>>> structure.drop.sql [BEGIN]
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 
 DROP INDEX IF EXISTS names_of_contacts_idx;
 DROP TABLE IF EXISTS contacts_names;
@@ -49,3 +59,7 @@ SELECT remove_code(TRUE, make_acodekeyl_bystr1('Persons types'), TRUE, TRUE, TRU
 DROP SEQUENCE IF EXISTS contacts_ids_seq;
 DROP SEQUENCE IF EXISTS persons_ids_seq;
 
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+\echo NOTICE >>>>> structure.drop.sql [END]

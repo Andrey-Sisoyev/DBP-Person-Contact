@@ -7,7 +7,10 @@
 --------------------------------------------------------------------------
 --------------------------------------------------------------------------
 
-\echo c_postal.drop.sql
+\echo NOTICE >>>>> contacts_instances/c_postal.drop.sql [BEGIN]
+
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
 
 DROP FUNCTION IF EXISTS instaniate_contact_as_postal(par_contact_id integer, par_contact_postal_ci contact_postal_construction_input);
 DROP FUNCTION IF EXISTS new_postal_address(par_postal_address_ci postal_address_construction_input);
@@ -28,3 +31,8 @@ DROP TABLE IF EXISTS postal_addresses;
 DROP SEQUENCE IF EXISTS postal_addresses_ids_seq;
 
 SELECT remove_code(TRUE, make_acodekeyl_bystr2('Personal contacts types', 'postal'), TRUE, TRUE, TRUE);
+
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
+
+\echo NOTICE >>>>> contacts_instances/c_postal.drop.sql [END]

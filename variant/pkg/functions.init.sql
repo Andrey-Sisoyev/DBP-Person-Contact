@@ -8,33 +8,44 @@
 --------------------------------------------------------------------------
 
 -- (1) case sensetive (2) postgres lowercases real names
-\c <<$db_name$>> user_<<$app_name$>>_owner
+\c <<$db_name$>> user_db<<$db_name$>>_app<<$app_name$>>_owner
 
-SET search_path TO sch_<<$app_name$>>, public; -- sets only for current session
+SET search_path TO sch_<<$app_name$>>, comn_funs, public; -- sets only for current session
+\set ECHO none
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
+
+\echo NOTICE >>>>> functions.init.sql [BEGIN]
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
 -- Lookup functions:
 
-CREATE OR REPLACE FUNCTION find_person_by_contact(par_contact_id integer) RETURNS integer AS $$
+CREATE OR REPLACE FUNCTION find_person_by_contact(par_contact_id integer) RETURNS integer
+LANGUAGE SQL
+AS $$
         SELECT p.person_id
         FROM sch_<<$app_name$>>.persons  AS p
            , sch_<<$app_name$>>.contacts AS c
         WHERE c.contact_id = $1
           AND p.person_id = c.person_id;
-$$ LANGUAGE SQL;
+$$;
 
 COMMENT ON FUNCTION find_person_by_contact(par_contact_id integer) IS
 'Returns person ID.';
 
 -------------------------------------------------------------------------------
 
-CREATE OR REPLACE FUNCTION find_contacts_of_person(par_person_id integer) RETURNS SETOF contacts AS $$
+CREATE OR REPLACE FUNCTION find_contacts_of_person(par_person_id integer) RETURNS SETOF contacts
+LANGUAGE SQL
+AS $$
         SELECT c.*
         FROM sch_<<$app_name$>>.contacts AS c
         WHERE c.person_id = $1;
-$$ LANGUAGE SQL;
+$$;
 
 -------------------------------------------------------------------------------
 
@@ -44,12 +55,11 @@ CREATE OR REPLACE FUNCTION find_persons_by_name(
         par_lng_codekeyl    t_code_key_by_lng
       , par_name_regexp     varchar
       , par_regexp_match_op posix_regexp_match_op
-      ) RETURNS SETOF persons AS $$
-DECLARE
-        namespace_info sch_<<$app_name$>>.t_namespace_info;
+      ) RETURNS SETOF persons
+LANGUAGE plpgsql
+SET search_path = sch_<<$app_name$>> -- , comn_funs, public
+AS $$
 BEGIN
-        namespace_info := sch_<<$app_name$>>.enter_schema_namespace();
-
         CASE par_regexp_match_op
                 WHEN '~' THEN
                         RETURN QUERY
@@ -95,10 +105,9 @@ BEGIN
                         RAISE EXCEPTION 'An error occurred in function "find_persons_by_name"! Unsupported value of "par_regexp_match_op" argument: "%"!', par_regexp_match_op;
         END CASE;
 
-        PERFORM leave_schema_namespace(namespace_info);
         RETURN;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 COMMENT ON FUNCTION find_persons_by_name(
         par_lng_codekeyl    t_code_key_by_lng
@@ -119,15 +128,15 @@ http://www.postgresql.org/docs/8.4/interactive/functions-matching.html
 CREATE OR REPLACE FUNCTION add_names_to_person(
         par_person_id integer
       , par_names     name_construction_input[]
-      ) RETURNS integer AS $$
+      ) RETURNS integer
+LANGUAGE plpgsql
+SET search_path = sch_<<$app_name$>> -- , comn_funs, public
+AS $$
 DECLARE
         cnt1 integer;
         cnt2 integer;
-        namespace_info sch_<<$app_name$>>.t_namespace_info;
         dflt_lng_c_id integer;
 BEGIN
-        namespace_info := sch_<<$app_name$>>.enter_schema_namespace();
-
         FOR cnt1 IN
                 SELECT 1 FROM unnest(par_names) AS inp WHERE codekeyl_type(inp.lng) = 'undef' LIMIT 1
         LOOP
@@ -162,10 +171,9 @@ BEGIN
                       ) AS v;
         GET DIAGNOSTICS cnt2 = ROW_COUNT;
 
-        PERFORM leave_schema_namespace(namespace_info);
         RETURN (cnt1 + cnt2);
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 COMMENT ON FUNCTION add_names_to_person(
         par_person_id integer
@@ -185,23 +193,23 @@ CREATE OR REPLACE FUNCTION mk_person_language_construction_input(
           par_lng_code              t_code_key_by_lng
         , par_lng_skill             integer
         , par_lng_personal_priority integer
-        ) RETURNS t_person_language_construction_input AS $$
+        ) RETURNS t_person_language_construction_input LANGUAGE SQL AS $$
         SELECT ROW ($1, $2, $3) :: t_person_language_construction_input;
-$$ LANGUAGE SQL;
+$$;
 
 -------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION add_languages_to_person(
         par_person_id integer
       , par_languages t_person_language_construction_input[]
-      ) RETURNS integer AS $$
+      ) RETURNS integer
+LANGUAGE plpgsql
+SET search_path = sch_<<$app_name$>> -- , comn_funs, public
+AS $$
 DECLARE
         p_id integer;
         cnt integer;
-        namespace_info sch_<<$app_name$>>.t_namespace_info;
 BEGIN
-        namespace_info := sch_<<$app_name$>>.enter_schema_namespace();
-
         INSERT INTO persons_languages (
                         person_id
                       , lng_code
@@ -215,10 +223,9 @@ BEGIN
                 FROM unnest(par_languages) AS pl;
         GET DIAGNOSTICS cnt = ROW_COUNT;
 
-        PERFORM leave_schema_namespace(namespace_info);
         RETURN cnt;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 COMMENT ON FUNCTION add_languages_to_person(
         par_person_id integer
@@ -232,16 +239,16 @@ CREATE OR REPLACE FUNCTION new_person(
         par_person_type t_code_key_by_lng
       , par_names       name_construction_input[]
       , par_languages   t_person_language_construction_input[]
-      ) RETURNS integer AS $$
+      ) RETURNS integer
+LANGUAGE plpgsql
+SET search_path = sch_<<$app_name$>> -- , comn_funs, public
+AS $$
 DECLARE
         p_id integer;
         cnt1 integer;
         cnt2 integer;
         cnt3 integer;
-        namespace_info sch_<<$app_name$>>.t_namespace_info;
 BEGIN
-        namespace_info := sch_<<$app_name$>>.enter_schema_namespace();
-
         INSERT INTO persons (person_type) VALUES (code_id_of( FALSE, generalize_codekeyl_wcf(make_codekey_bystr('Persons types'), par_person_type)))
         RETURNING person_id INTO p_id;
         GET DIAGNOSTICS cnt1 = ROW_COUNT;
@@ -256,10 +263,9 @@ BEGIN
                , par_names
                );
 
-        PERFORM leave_schema_namespace(namespace_info);
         RETURN p_id;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 COMMENT ON FUNCTION new_person(
         par_person_type t_code_key_by_lng
@@ -270,15 +276,15 @@ COMMENT ON FUNCTION new_person(
 
 -------------------------------------------------------------------------------
 
-CREATE OR REPLACE FUNCTION add_names_to_contact(par_contact_id integer, par_contact_names name_construction_input[]) RETURNS integer AS $$
+CREATE OR REPLACE FUNCTION add_names_to_contact(par_contact_id integer, par_contact_names name_construction_input[]) RETURNS integer
+LANGUAGE plpgsql
+SET search_path = sch_<<$app_name$>> -- , comn_funs, public
+AS $$
 DECLARE
         cnt1 integer;
         cnt2 integer;
-        namespace_info sch_<<$app_name$>>.t_namespace_info;
         dflt_lng_c_id integer;
 BEGIN
-        namespace_info := sch_<<$app_name$>>.enter_schema_namespace();
-
         FOR cnt1 IN
                 SELECT 1 FROM unnest(par_contact_names) AS inp WHERE codekeyl_type(inp.lng) = 'undef' LIMIT 1
         LOOP
@@ -313,10 +319,9 @@ BEGIN
                       ) AS v;
         GET DIAGNOSTICS cnt2 = ROW_COUNT;
 
-        PERFORM leave_schema_namespace(namespace_info);
         RETURN (cnt1 + cnt2);
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 COMMENT ON FUNCTION add_names_to_contact(par_contact_id integer, par_contact_names name_construction_input[]) IS
 'Returns count of rows inserted.';
@@ -333,21 +338,20 @@ CREATE OR REPLACE FUNCTION mk_contact_construction_input(
          par_contact_type              t_code_key_by_lng
        , par_contact_personal_priority integer
        , par_contact_constraints       varchar
-       ) RETURNS contact_construction_input AS $$
-        SELECT ROW ($1, $2, $3) :: contact_construction_input;
-$$ LANGUAGE SQL;
+       ) RETURNS contact_construction_input
+LANGUAGE SQL
+AS $$ SELECT ROW ($1, $2, $3) :: sch_<<$app_name$>>.contact_construction_input; $$;
 
 -------------------------------------------------------------------------------
 
-CREATE OR REPLACE FUNCTION new_abstract_contact(par_person_id integer, par_contact_ci contact_construction_input, par_contact_names name_construction_input[]) RETURNS integer AS $$
-DECLARE
-        c_id integer;
+CREATE OR REPLACE FUNCTION new_abstract_contact(par_person_id integer, par_contact_ci contact_construction_input, par_contact_names name_construction_input[]) RETURNS integer
+LANGUAGE plpgsql
+SET search_path = sch_<<$app_name$>> -- , comn_funs, public
+AS $$
+DECLARE c_id integer;
         cnt1 integer;
         cnt2 integer;
-        namespace_info sch_<<$app_name$>>.t_namespace_info;
 BEGIN
-        namespace_info := sch_<<$app_name$>>.enter_schema_namespace();
-
         INSERT INTO contacts (
                         person_id
                       , contact_type
@@ -364,10 +368,9 @@ BEGIN
 
         cnt2:= add_names_to_contact(c_id, par_contact_names);
 
-        PERFORM leave_schema_namespace(namespace_info);
         RETURN c_id;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 COMMENT ON FUNCTION new_abstract_contact(par_person_id integer, par_contact_ci contact_construction_input, par_contact_names name_construction_input[]) IS
 'Returns contact ID.';
@@ -376,21 +379,29 @@ COMMENT ON FUNCTION new_abstract_contact(par_person_id integer, par_contact_ci c
 
 -- Referncing functions:
 
-GRANT EXECUTE ON FUNCTION mk_person_language_construction_input(par_lng_code t_code_key_by_lng, par_lng_skill integer, par_lng_personal_priority integer)TO user_<<$app_name$>>_data_admin, user_<<$app_name$>>_data_reader;
-GRANT EXECUTE ON FUNCTION mk_contact_construction_input(par_contact_type t_code_key_by_lng, par_contact_personal_priority integer, par_contact_constraints varchar)TO user_<<$app_name$>>_data_admin, user_<<$app_name$>>_data_reader;
+GRANT EXECUTE ON FUNCTION mk_person_language_construction_input(par_lng_code t_code_key_by_lng, par_lng_skill integer, par_lng_personal_priority integer) TO user_db<<$db_name$>>_app<<$app_name$>>_data_admin, user_db<<$db_name$>>_app<<$app_name$>>_data_reader;
+GRANT EXECUTE ON FUNCTION mk_contact_construction_input(par_contact_type t_code_key_by_lng, par_contact_personal_priority integer, par_contact_constraints varchar) TO user_db<<$db_name$>>_app<<$app_name$>>_data_admin, user_db<<$db_name$>>_app<<$app_name$>>_data_reader;
 
 -- Lookup functions:
 
-GRANT EXECUTE ON FUNCTION find_person_by_contact(par_contact_id integer)TO user_<<$app_name$>>_data_admin, user_<<$app_name$>>_data_reader;
-GRANT EXECUTE ON FUNCTION find_contacts_of_person(par_person_id integer)TO user_<<$app_name$>>_data_admin, user_<<$app_name$>>_data_reader;
-GRANT EXECUTE ON FUNCTION find_persons_by_name(par_lng_codekeyl t_code_key_by_lng, par_name_regexp varchar, par_regexp_match_op posix_regexp_match_op)TO user_<<$app_name$>>_data_admin, user_<<$app_name$>>_data_reader;
+GRANT EXECUTE ON FUNCTION find_person_by_contact(par_contact_id integer) TO user_db<<$db_name$>>_app<<$app_name$>>_data_admin, user_db<<$db_name$>>_app<<$app_name$>>_data_reader;
+GRANT EXECUTE ON FUNCTION find_contacts_of_person(par_person_id integer) TO user_db<<$db_name$>>_app<<$app_name$>>_data_admin, user_db<<$db_name$>>_app<<$app_name$>>_data_reader;
+GRANT EXECUTE ON FUNCTION find_persons_by_name(par_lng_codekeyl t_code_key_by_lng, par_name_regexp varchar, par_regexp_match_op posix_regexp_match_op) TO user_db<<$db_name$>>_app<<$app_name$>>_data_admin, user_db<<$db_name$>>_app<<$app_name$>>_data_reader;
 
 -- Administration functions:
 
-GRANT EXECUTE ON FUNCTION new_abstract_contact(par_person_id integer, par_contact_ci contact_construction_input, par_contact_names name_construction_input[])TO user_<<$app_name$>>_data_admin;
-GRANT EXECUTE ON FUNCTION add_names_to_contact(par_contact_id integer, par_contact_names name_construction_input[])TO user_<<$app_name$>>_data_admin;
-GRANT EXECUTE ON FUNCTION new_person(par_person_type t_code_key_by_lng, par_names name_construction_input[], par_languages t_person_language_construction_input[])TO user_<<$app_name$>>_data_admin;
-GRANT EXECUTE ON FUNCTION add_languages_to_person(par_person_id integer, par_languages t_person_language_construction_input[])TO user_<<$app_name$>>_data_admin;
-GRANT EXECUTE ON FUNCTION add_names_to_person(par_person_id integer, par_names name_construction_input[])TO user_<<$app_name$>>_data_admin;
+GRANT EXECUTE ON FUNCTION new_abstract_contact(par_person_id integer, par_contact_ci contact_construction_input, par_contact_names name_construction_input[])  TO user_db<<$db_name$>>_app<<$app_name$>>_data_admin;
+GRANT EXECUTE ON FUNCTION add_names_to_contact(par_contact_id integer, par_contact_names name_construction_input[])  TO user_db<<$db_name$>>_app<<$app_name$>>_data_admin;
+GRANT EXECUTE ON FUNCTION new_person(par_person_type t_code_key_by_lng, par_names name_construction_input[], par_languages t_person_language_construction_input[])  TO user_db<<$db_name$>>_app<<$app_name$>>_data_admin;
+GRANT EXECUTE ON FUNCTION add_languages_to_person(par_person_id integer, par_languages t_person_language_construction_input[])  TO user_db<<$db_name$>>_app<<$app_name$>>_data_admin;
+GRANT EXECUTE ON FUNCTION add_names_to_person(par_person_id integer, par_names name_construction_input[])  TO user_db<<$db_name$>>_app<<$app_name$>>_data_admin;
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+\echo NOTICE >>>>> functions.init.sql [END]
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 
 \i contacts_instances/main.init.sql

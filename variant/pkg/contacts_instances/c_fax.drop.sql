@@ -7,7 +7,10 @@
 --------------------------------------------------------------------------
 --------------------------------------------------------------------------
 
-\echo c_fax.drop.sql
+\echo NOTICE >>>>> contacts_instances/c_fax.drop.sql [BEGIN]
+
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
 
 DROP FUNCTION IF EXISTS instaniate_contact_as_fax(par_contact_id integer, par_contact_fax_ci contact_fax_construction_input);
 
@@ -24,3 +27,8 @@ UPDATE contacts SET contact_type = NULL, contact_instaniated_isit = FALSE WHERE 
 DROP TABLE IF EXISTS contacts__faxes;
 
 SELECT remove_code(TRUE, make_acodekeyl_bystr2('Personal contacts types', 'fax'), TRUE, TRUE, TRUE);
+
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
+
+\echo NOTICE >>>>> contacts_instances/c_fax.drop.sql [END]

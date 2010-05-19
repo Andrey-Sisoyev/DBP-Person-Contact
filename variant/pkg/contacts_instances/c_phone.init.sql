@@ -7,7 +7,10 @@
 --------------------------------------------------------------------------
 --------------------------------------------------------------------------
 
-\echo c_phone.init.sql
+\echo NOTICE >>>>> contacts_instances/c_phone.init.sql [BEGIN]
+
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
 
 SELECT add_subcodes_under_codifier(
                 make_codekeyl_bystr('Personal contacts types')
@@ -25,8 +28,8 @@ CREATE TABLE contacts__phones (
        , PRIMARY KEY (contact_id)
 ) TABLESPACE tabsp_<<$db_name$>>_<<$app_name$>>;
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE contacts__phones TO user_<<$app_name$>>_data_admin;
-GRANT SELECT                         ON TABLE contacts__phones TO user_<<$app_name$>>_data_reader;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE contacts__phones TO user_db<<$db_name$>>_app<<$app_name$>>_data_admin;
+GRANT SELECT                         ON TABLE contacts__phones TO user_db<<$db_name$>>_app<<$app_name$>>_data_reader;
 
 ------------
 
@@ -49,7 +52,9 @@ CREATE TYPE contact_phone_construction_input AS (
         phone_numb varchar
 );
 
-CREATE OR REPLACE FUNCTION instaniate_contact_as_phone(par_contact_id integer, par_contact_phone_ci contact_phone_construction_input) RETURNS integer AS $$
+CREATE OR REPLACE FUNCTION instaniate_contact_as_phone(par_contact_id integer, par_contact_phone_ci contact_phone_construction_input) RETURNS integer
+LANGUAGE plpgsql
+AS $$
 DECLARE
         cnt integer:= 0;
 BEGIN
@@ -65,11 +70,16 @@ BEGIN
 
         RETURN cnt;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 COMMENT ON FUNCTION instaniate_contact_as_phone(par_contact_id integer, par_contact_phone_ci contact_phone_construction_input) IS
 'Returns count of rows inserted (usually 1).
 Before instaniating contact as an email, it must be of apropriate type - value of the "contacts.contact_type" field must be "phone" code. Orelse, an error will be triggered.
 ';
 
-GRANT EXECUTE ON FUNCTION instaniate_contact_as_phone(par_contact_id integer, par_contact_phone_ci contact_phone_construction_input)TO user_<<$app_name$>>_data_admin;
+GRANT EXECUTE ON FUNCTION instaniate_contact_as_phone(par_contact_id integer, par_contact_phone_ci contact_phone_construction_input)TO user_db<<$db_name$>>_app<<$app_name$>>_data_admin;
+
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
+
+\echo NOTICE >>>>> contacts_instances/c_phone.init.sql [END]

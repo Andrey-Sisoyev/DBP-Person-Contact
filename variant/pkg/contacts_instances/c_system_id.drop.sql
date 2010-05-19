@@ -7,7 +7,10 @@
 --------------------------------------------------------------------------
 --------------------------------------------------------------------------
 
-\echo c_system_id.drop.sql
+\echo NOTICE >>>>> contacts_instances/c_system_id.drop.sql [BEGIN]
+
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
 
 DROP FUNCTION IF EXISTS instaniate_contact_as_system_id(par_contact_id integer, par_contact_system_id_ci contact_system_id_construction_input);
 
@@ -27,3 +30,8 @@ DROP TABLE IF EXISTS contacts__systems_ids;
 
 SELECT remove_code(TRUE, make_acodekeyl_bystr2('Personal contacts types', 'ID in some system'), TRUE, TRUE, TRUE);
 SELECT remove_code(TRUE, make_acodekeyl_bystr1('Persons registering systems'), TRUE, TRUE, TRUE);
+
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
+
+\echo NOTICE >>>>> contacts_instances/c_system_id.drop.sql [END]

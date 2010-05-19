@@ -7,7 +7,10 @@
 --------------------------------------------------------------------------
 --------------------------------------------------------------------------
 
-\echo c_system_id.init.sql
+\echo NOTICE >>>>> contacts_instances/c_system_id.init.sql [BEGIN]
+
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
 
 SELECT add_subcodes_under_codifier(
                 make_codekeyl_bystr('Personal contacts types')
@@ -52,8 +55,8 @@ CREATE TABLE contacts__systems_ids (
        , PRIMARY KEY (contact_id)
 ) TABLESPACE tabsp_<<$db_name$>>_<<$app_name$>>;
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE contacts__systems_ids TO user_<<$app_name$>>_data_admin;
-GRANT SELECT                         ON TABLE contacts__systems_ids TO user_<<$app_name$>>_data_reader;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE contacts__systems_ids TO user_db<<$db_name$>>_app<<$app_name$>>_data_admin;
+GRANT SELECT                         ON TABLE contacts__systems_ids TO user_db<<$db_name$>>_app<<$app_name$>>_data_reader;
 
 ------------
 
@@ -79,7 +82,9 @@ CREATE TYPE contact_system_id_construction_input AS (
       , additional_insystem_addr_info varchar
 );
 
-CREATE OR REPLACE FUNCTION instaniate_contact_as_system_id(par_contact_id integer, par_contact_system_id_ci contact_system_id_construction_input) RETURNS integer AS $$
+CREATE OR REPLACE FUNCTION instaniate_contact_as_system_id(par_contact_id integer, par_contact_system_id_ci contact_system_id_construction_input) RETURNS integer
+LANGUAGE plpgsql
+AS $$
 DECLARE
         cnt integer:= 0;
 BEGIN
@@ -90,7 +95,7 @@ BEGIN
                       , additional_insystem_addr_info
                       )
                VALUES ( par_contact_id
-                      , code_id_of( FALSE, generalize_codekeyl_wcf(make_codekey_bystr('Persons registering systems'), par_contact_system_id_ci.system))
+                      , code_id_of( FALSE, sch_<<$app_name$>>.generalize_codekeyl_wcf(sch_<<$app_name$>>.make_codekey_bystr('Persons registering systems'), par_contact_system_id_ci.system))
                       , par_contact_system_id_ci.id_or_nick_in_system
                       , par_contact_system_id_ci.additional_insystem_addr_info
                       );
@@ -99,11 +104,16 @@ BEGIN
 
         RETURN cnt;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 COMMENT ON FUNCTION instaniate_contact_as_system_id(par_contact_id integer, par_contact_system_id_ci contact_system_id_construction_input) IS
 'Returns count of rows inserted (usually 1).
 Before instaniating contact as an email, it must be of apropriate type - value of the "contacts.contact_type" field must be "ID in some system" code. Orelse, an error will be triggered.
 ';
 
-GRANT EXECUTE ON FUNCTION instaniate_contact_as_system_id(par_contact_id integer, par_contact_system_id_ci contact_system_id_construction_input)TO user_<<$app_name$>>_data_admin;
+GRANT EXECUTE ON FUNCTION instaniate_contact_as_system_id(par_contact_id integer, par_contact_system_id_ci contact_system_id_construction_input)TO user_db<<$db_name$>>_app<<$app_name$>>_data_admin;
+
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
+
+\echo NOTICE >>>>> contacts_instances/c_system_id.init.sql [END]

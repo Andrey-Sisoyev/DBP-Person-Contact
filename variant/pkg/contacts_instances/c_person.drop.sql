@@ -7,7 +7,10 @@
 --------------------------------------------------------------------------
 --------------------------------------------------------------------------
 
-\echo c_person.drop.sql
+\echo NOTICE >>>>> contacts_instances/c_person.drop.sql [BEGIN]
+
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
 
 DROP FUNCTION IF EXISTS instaniate_contact_as_person(par_contact_id integer, par_contact_person_ci contact_person_construction_input);
 
@@ -25,3 +28,7 @@ DROP TABLE IF EXISTS contacts__persons;
 
 SELECT remove_code(TRUE, make_acodekeyl_bystr2('Personal contacts types', 'another person'), TRUE, TRUE, TRUE);
 
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
+
+\echo NOTICE >>>>> contacts_instances/c_person.drop.sql [END]
