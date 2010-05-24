@@ -94,14 +94,8 @@ CREATE TABLE persons_languages (
        , lng_code              integer NOT NULL
        , lng_skill             integer     NULL           CHECK ((lng_skill >= -100 AND lng_skill <= 100) OR lng_skill IS NULL)
        , lng_personal_priority integer NOT NULL DEFAULT 0 CHECK  (lng_personal_priority >= -100 AND lng_personal_priority <= 100)
-       , CHECK (code_belongs_to_codifier(
-                          FALSE
-                        , make_acodekeyl( make_codekey_null()
-                                        , make_codekey_bystr('Languages')
-                                        , make_codekey_byid(lng_code)
-               )        )               )
-       , FOREIGN KEY (person_id) REFERENCES persons (person_id) ON DELETE CASCADE  ON UPDATE CASCADE
-       , FOREIGN KEY (lng_code)  REFERENCES codes(code_id)      ON DELETE RESTRICT ON UPDATE CASCADE
+       , FOREIGN KEY (lng_code)  REFERENCES languages(code_id)  ON UPDATE CASCADE ON DELETE RESTRICT
+       , FOREIGN KEY (person_id) REFERENCES persons (person_id) ON DELETE CASCADE ON UPDATE CASCADE
        , PRIMARY KEY (person_id, lng_code)
 ) TABLESPACE tabsp_<<$db_name$>>_<<$app_name$>>;
 
@@ -118,10 +112,9 @@ GRANT SELECT                         ON TABLE persons_languages TO user_db<<$db_
 CREATE TABLE persons_names (
         person_id integer NOT NULL
       , PRIMARY KEY (person_id, lng_of_name)
-      , FOREIGN KEY (person_id)   REFERENCES persons(person_id)
-                                                            ON DELETE CASCADE  ON UPDATE CASCADE
-      , FOREIGN KEY (lng_of_name) REFERENCES codes(code_id) ON DELETE RESTRICT ON UPDATE CASCADE
-      , FOREIGN KEY (entity)      REFERENCES codes(code_id) ON DELETE RESTRICT ON UPDATE CASCADE
+      , FOREIGN KEY (person_id)   REFERENCES persons(person_id) ON DELETE CASCADE  ON UPDATE CASCADE
+      , FOREIGN KEY (lng_of_name) REFERENCES languages(code_id) ON UPDATE CASCADE  ON DELETE RESTRICT
+      , FOREIGN KEY (entity)      REFERENCES codes(code_id)     ON DELETE RESTRICT ON UPDATE CASCADE
 ) INHERITS (named_in_languages)
   TABLESPACE tabsp_<<$db_name$>>_<<$app_name$>>;
 
@@ -202,10 +195,9 @@ CREATE INDEX types_of_contacts_idx ON contacts(contact_type) TABLESPACE tabsp_<<
 CREATE TABLE contacts_names (
         contact_id integer NOT NULL
       , PRIMARY KEY (contact_id, lng_of_name)
-      , FOREIGN KEY (contact_id)  REFERENCES contacts(contact_id)
-                                                            ON DELETE CASCADE  ON UPDATE CASCADE
-      , FOREIGN KEY (lng_of_name) REFERENCES codes(code_id) ON DELETE RESTRICT ON UPDATE CASCADE
-      , FOREIGN KEY (entity)      REFERENCES codes(code_id) ON DELETE RESTRICT ON UPDATE CASCADE
+      , FOREIGN KEY (contact_id)  REFERENCES contacts(contact_id) ON DELETE CASCADE  ON UPDATE CASCADE
+      , FOREIGN KEY (lng_of_name) REFERENCES languages(code_id)   ON UPDATE CASCADE  ON DELETE RESTRICT
+      , FOREIGN KEY (entity)      REFERENCES codes(code_id)       ON DELETE RESTRICT ON UPDATE CASCADE
 ) INHERITS (named_in_languages)
   TABLESPACE tabsp_<<$db_name$>>_<<$app_name$>>;
 
