@@ -15,3 +15,5 @@ Changes from 0.2 to 0.3
 * Migrated on DBP-tpl template v0.5 (from v0.4).
 * Languages FOREIGN KEYs to are now referencing 
   dedicated codifier-table "languages", instead of "codes". 
+* Added "USING INDEX TABLESPACE tabsp_<<$db_name$>>_<<$app_name$>>_idxs" 
+        to PRIMARY KEYS.
