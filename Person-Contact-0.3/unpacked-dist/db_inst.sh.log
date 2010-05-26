@@ -1,0 +1,9 @@
+[1;37m---------START-OF-FILE-----------[0;37m
+[1;37mDB package install log file.[0;37m
+[1;37mDate, time:[0;37m [1;34m2010.05.26 07:58:07 [0;37m
+[1;37mRun arguments [postgres]:[0;37m [1;34m./platforms/PostgreSQL/_admin/Linux/inst.sh --clean --unpack    [0;37m
+
+Database name must satisfy pattern '[_a-z][_a-z0-9]*' ([1;35mnotice[0m: uppercase is not supported!).
+You provided this: '--clean'$
+Preparation [31;1mfailed[0m!
+[1;37m-----------END-OF-FILE-----------[0;37m
